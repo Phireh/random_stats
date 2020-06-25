@@ -124,16 +124,7 @@ void method1(int *stats)
 {
   int r;
   for (int i = 0; i < P; ++i) {
-    int max_rand = 0, max_idx = 0;
-    for (int j = 0; j < X; ++j) {
-      r = rand();
-      if (r > max_rand) {
-        max_rand = r;
-        max_idx = j;
-      }
-    }
-    // Note that we skip checking for all-0s. We just give a point to idx 0 in that case.
-    ++stats[max_idx];
+    ++stats[rand() % X];
   }
 }
 
@@ -157,15 +148,7 @@ void method2(int *stats)
 
   /* Revert back to Method 1 */
   for (int i = 0; i < p; ++i) {
-    int max_rand = 0, max_idx = 0;
-    for (int j = 0; j < X; ++j) {
-      r = rand();
-      if (r > max_rand) {
-        max_rand = r;
-        max_idx = j;
-      }
-    }
-    ++stats[max_idx];
+    ++stats[rand() % X];
     --p;
     PRINTD("Giving 1 point to idx %d\n", max_idx);
   }
@@ -179,7 +162,6 @@ void method3(int *stats)
   int r;
 
   while (p) {
-    int max_rand = 0, max_idx = 0;
       chunk_size = p/X;
       PRINTD("p = %d, chunk_size = %d\n", p, chunk_size);
       for (int j = 0; j < X; ++j) {
@@ -191,13 +173,9 @@ void method3(int *stats)
           PRINTD("Giving %d points to idx %d\n", r % chunk_size, j);
         }
         /* Method 1: Give out 1 point */
-        if (r > max_rand) {
-          max_rand = r;
-          max_idx = j;
-        }
       }
-    ++stats[max_idx];
-    --p;
-    PRINTD("Giving 1 point to idx %d\n", max_idx);
+      ++stats[rand() % X];
+      --p;
+      PRINTD("Giving 1 point to idx %d\n", max_idx);
   }
 }
