@@ -10,6 +10,9 @@
 #endif
 
 #define NSECS 1000000000.0
+#define USECS 1000000.0
+#define MSECS 1000.0
+#define SECS  1.0
 
 void method1(int *stats);
 void method2(int *stats);
@@ -18,15 +21,22 @@ void method3(int *stats);
 int P = 100000; // pool of total points
 int X = 400;    // number of stats
 int N = 1;      // number of iterations
+char *unit_name = "ns";
+double units = NSECS;
 int pretty_print = 0;
 int quiet = 0;
 
 int main(int argc, char *argv[])
 {
+  static int unit_flag;
   while (1) {
     static struct option long_options[] =
       {
         {"pretty-print", no_argument, &pretty_print, 1},
+        {"ns", no_argument, &unit_flag, 1},
+        {"us", no_argument, &unit_flag, 2},
+        {"ms", no_argument, &unit_flag, 3},
+        {"s", no_argument, &unit_flag, 4},
         {0,0,0,0}
       };
     /* Parse cmd arguments if provided */
@@ -36,6 +46,8 @@ int main(int argc, char *argv[])
     if (c == -1) break;
     
     switch (c) {
+    case 0:
+      break;
     case 'x':
       if (optopt == 'x')
         fprintf(stderr, "Option x needs a number\n");
@@ -57,11 +69,31 @@ int main(int argc, char *argv[])
     case 'q':
       quiet = 1;
       break;
-    case 0:
     default:
       break;
     }
   }
+
+  switch (unit_flag) {
+  case 0:
+  case 1:
+    units = NSECS;
+    unit_name = "ns";
+    break;
+  case 2:
+    units = USECS;
+    unit_name = "us";
+    break;
+  case 3:
+    units = MSECS;
+    unit_name = "ms";
+    break;
+  case 4:
+    units = SECS;
+    unit_name = "s";
+    break;
+  }
+  
 
   printf("X = %d, P = %d\n", X, P);
   
@@ -137,10 +169,10 @@ int main(int argc, char *argv[])
     }
   }
   printf("================================================\n");
-  printf("\t\t Total \t\t Avg\n");
-  printf("Method 1 \t %f \t %f\n", tt1, tt1/N);
-  printf("Method 2 \t %f \t %f\n", tt2, tt2/N);
-  printf("Method 3 \t %f \t %f\n", tt3, tt3/N);
+  printf("\t\t Total \t\t\t Avg\n");
+  printf("Method 1 \t %5.5f %s \t %5.5f %s\n", tt1 * units, unit_name, tt1/N * units, unit_name);
+  printf("Method 2 \t %5.5f %s \t %5.5f %s\n", tt2 * units, unit_name, tt2/N * units, unit_name);
+  printf("Method 3 \t %5.5f %s \t %5.5f %s\n", tt3 * units, unit_name, tt3/N * units, unit_name);
 }
 
 /* Method 1: Give out points one by one, to the highest number of a global roll */
