@@ -3,6 +3,14 @@
 #include <stdlib.h>
 #include <getopt.h>
 
+
+#ifdef CLOCK_MONOTONIC_RAW
+#define CLOCK_TYPE CLOCK_MONOTONIC_RAW
+#else
+#define CLOCK_TYPE CLOCK_MONOTONIC
+#endif
+
+
 #ifdef DEBUG
 #define PRINTD(fmt, ...) printf(fmt, ##__VA_ARGS__)
 #else
@@ -13,6 +21,7 @@
 #define USECS 1000000.0
 #define MSECS 1000.0
 #define SECS  1.0
+
 
 void method1(int *stats);
 void method2(int *stats);
@@ -117,9 +126,9 @@ int main(int argc, char *argv[])
 
   for (int j = 0; j < N; j++) {
     if (!quiet) printf("Running method 1...\n");
-    clock_gettime(CLOCK_MONOTONIC_RAW, &t1b);
+    clock_gettime(CLOCK_TYPE, &t1b);
     method1(statblock1);
-    clock_gettime(CLOCK_MONOTONIC_RAW, &t1e);
+    clock_gettime(CLOCK_TYPE, &t1e);
     lt1 = (t1e.tv_nsec - t1b.tv_nsec) / NSECS + (t1e.tv_sec - t1b.tv_sec);
     tt1 += lt1;
     if (!quiet) printf("Time = %fs\n", lt1);
@@ -134,9 +143,9 @@ int main(int argc, char *argv[])
   
     if (!quiet) printf("Running method 2...\n");
   
-    clock_gettime(CLOCK_MONOTONIC_RAW, &t2b);
+    clock_gettime(CLOCK_TYPE, &t2b);
     method2(statblock2);
-    clock_gettime(CLOCK_MONOTONIC_RAW, &t2e);
+    clock_gettime(CLOCK_TYPE, &t2e);
     lt2 = (t2e.tv_nsec - t2b.tv_nsec) / NSECS + (t2e.tv_sec - t2b.tv_sec);
     tt2 += lt2;
     if (!quiet) printf("Time = %fs\n", lt2);
@@ -152,9 +161,9 @@ int main(int argc, char *argv[])
     if (!quiet) printf("Running method 3...\n");
   
   
-    clock_gettime(CLOCK_MONOTONIC_RAW, &t3b);
+    clock_gettime(CLOCK_TYPE, &t3b);
     method3(statblock3);
-    clock_gettime(CLOCK_MONOTONIC_RAW, &t3e);
+    clock_gettime(CLOCK_TYPE, &t3e);
     lt3 = (t3e.tv_nsec - t3b.tv_nsec) / NSECS + (t3e.tv_sec - t3b.tv_sec);
     tt3 += lt3;
     if (!quiet) printf("Time = %fs\n", lt3);
