@@ -17,7 +17,9 @@ void method3(int *stats);
 
 int P = 100000; // pool of total points
 int X = 400;    // number of stats
+int N = 1;      // number of iterations
 int pretty_print = 0;
+int quiet = 0;
 
 int main(int argc, char *argv[])
 {
@@ -30,7 +32,7 @@ int main(int argc, char *argv[])
     /* Parse cmd arguments if provided */
     int c, option_index = 0;
 
-    c = getopt_long(argc, argv, "x:p:", long_options, &option_index);
+    c = getopt_long(argc, argv, "x:p:n:q", long_options, &option_index);
     if (c == -1) break;
     
     switch (c) {
@@ -45,6 +47,15 @@ int main(int argc, char *argv[])
         fprintf(stderr, "Option p needs a number\n");
       else
         P = atoi(optarg);
+      break;
+    case 'n':
+      if (optopt == 'n')
+        fprintf(stderr, "Option n needs a number\n");
+      else
+        N = atoi(optarg);
+      break;
+    case 'q':
+      quiet = 1;
       break;
     case 0:
     default:
@@ -69,54 +80,67 @@ int main(int argc, char *argv[])
      Doing it like https://stackoverflow.com/a/41959179 */
   
   struct timespec t1b, t1e, t2b, t2e, t3b, t3e;
+  double lt1, tt1, lt2, tt2, lt3, tt3;
   
 
-  
-  printf("Running method 1...\n");
-  clock_gettime(CLOCK_MONOTONIC_RAW, &t1b);
-  method1(statblock1);
-  clock_gettime(CLOCK_MONOTONIC_RAW, &t1e);
-  printf("Time = %fs\n", (t1e.tv_nsec - t1b.tv_nsec) / NSECS + (t1e.tv_sec - t1b.tv_sec));
+  for (int j = 0; j < N; j++) {
+    if (!quiet) printf("Running method 1...\n");
+    clock_gettime(CLOCK_MONOTONIC_RAW, &t1b);
+    method1(statblock1);
+    clock_gettime(CLOCK_MONOTONIC_RAW, &t1e);
+    lt1 = (t1e.tv_nsec - t1b.tv_nsec) / NSECS + (t1e.tv_sec - t1b.tv_sec);
+    tt1 += lt1;
+    if (!quiet) printf("Time = %fs\n", lt1);
 
-  if (pretty_print) {
-    printf("STATBLOCK 1\n");
-    for (int i = 0; i < X; ++i) {
-      printf("Stat %d -> %d\n", i, statblock1[i]);
+    if (pretty_print) {
+      printf("STATBLOCK 1\n");
+      for (int i = 0; i < X; ++i) {
+        printf("Stat %d -> %d\n", i, statblock1[i]);
+      }
+      printf("---------------------\n");
     }
-    printf("---------------------\n");
-  }
   
-  printf("Running method 2...\n");
+    if (!quiet) printf("Running method 2...\n");
   
-  clock_gettime(CLOCK_MONOTONIC_RAW, &t2b);
-  method2(statblock2);
-  clock_gettime(CLOCK_MONOTONIC_RAW, &t2e);
-  printf("Time = %fs\n", (t2e.tv_nsec - t2b.tv_nsec) / NSECS + (t2e.tv_sec - t2b.tv_sec));
+    clock_gettime(CLOCK_MONOTONIC_RAW, &t2b);
+    method2(statblock2);
+    clock_gettime(CLOCK_MONOTONIC_RAW, &t2e);
+    lt2 = (t2e.tv_nsec - t2b.tv_nsec) / NSECS + (t2e.tv_sec - t2b.tv_sec);
+    tt2 += lt2;
+    if (!quiet) printf("Time = %fs\n", lt2);
 
-  if (pretty_print) {
-    printf("STATBLOCK 2\n");
-    for (int i = 0; i < X; ++i) {
-      printf("Stat %d -> %d\n", i, statblock2[i]);
+    if (pretty_print) {
+      printf("STATBLOCK 2\n");
+      for (int i = 0; i < X; ++i) {
+        printf("Stat %d -> %d\n", i, statblock2[i]);
+      }
+      printf("---------------------\n");
     }
-    printf("---------------------\n");
-  }
   
-  printf("Running method 3...\n");
+    if (!quiet) printf("Running method 3...\n");
   
   
-  clock_gettime(CLOCK_MONOTONIC_RAW, &t3b);
-  method3(statblock3);
-  clock_gettime(CLOCK_MONOTONIC_RAW, &t3e);
-  printf("Time = %fs\n", (t3e.tv_nsec - t3b.tv_nsec) / NSECS + (t3e.tv_sec - t3b.tv_sec));
+    clock_gettime(CLOCK_MONOTONIC_RAW, &t3b);
+    method3(statblock3);
+    clock_gettime(CLOCK_MONOTONIC_RAW, &t3e);
+    lt3 = (t3e.tv_nsec - t3b.tv_nsec) / NSECS + (t3e.tv_sec - t3b.tv_sec);
+    tt3 += lt3;
+    if (!quiet) printf("Time = %fs\n", lt3);
 
   
-  if (pretty_print) {
-    printf("STATBLOCK 3\n");
-    for (int i = 0; i < X; ++i) {
-      printf("Stat %d -> %d\n", i, statblock3[i]);
+    if (pretty_print) {
+      printf("STATBLOCK 3\n");
+      for (int i = 0; i < X; ++i) {
+        printf("Stat %d -> %d\n", i, statblock3[i]);
+      }
+      printf("---------------------\n");
     }
-    printf("---------------------\n");
   }
+  printf("================================================\n");
+  printf("\t\t Total \t\t Avg\n");
+  printf("Method 1 \t %f \t %f\n", tt1, tt1/N);
+  printf("Method 2 \t %f \t %f\n", tt2, tt2/N);
+  printf("Method 3 \t %f \t %f\n", tt3, tt3/N);
 }
 
 /* Method 1: Give out points one by one, to the highest number of a global roll */
